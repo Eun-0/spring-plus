@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -48,10 +50,23 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(
+            int page,
+            int size,
+            String weather,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    ) {
+        // 시작일과 종료일이 모두 존재하는 기간 조건의 유효성 검사
+        if((startDate != null) && (endDate != null) && (startDate.isAfter(endDate))) {
+            throw new InvalidRequestException("Start date cannot be after end date");
+        }
+
+        // 페이지네이션
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        // 'weather' 조건과 '수정일 기준의 기간'으로 할 일 검색 & 수정일 기준 내림차순 정렬
+        Page<Todo> todos = todoRepository.retrieveByConditionOrderByModifiedAtDesc(weather, startDate, endDate, pageable);
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
