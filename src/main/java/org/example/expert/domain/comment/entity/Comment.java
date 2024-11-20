@@ -7,6 +7,9 @@ import org.example.expert.domain.common.entity.Timestamped;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.entity.User;
 
+// [Level 2-7] N+1 문제
+// 3. @NamedEntityGraph
+//@NamedEntityGraph(name = "Comment.findAll", attributeNodes = @NamedAttributeNode("user"))
 @Getter
 @Entity
 @NoArgsConstructor
